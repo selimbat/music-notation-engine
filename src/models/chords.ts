@@ -1,3 +1,4 @@
+import { NoteName } from "./definitions";
 import intervals, { getIntervalNote } from "./intervals";
 import Pitch from "./pitch";
 import { Interval } from "./types";
@@ -11,6 +12,13 @@ export const getNotesOfChord = (chord: Chord, root: Pitch): Pitch[] => {
         return getIntervalNote(root, i);
     })
 }
+
+type TriadChordQuality = '' | '-' | 'aug' | 'dim' | 'sus2' | 'sus4';
+type SeventhChordQuality = '7' | 'maj7' | '-7' | '-maj7' | 'ø' | 'dim7' | '7sus2' | '7sus4';
+type ChordQuality = TriadChordQuality | SeventhChordQuality
+type ChordNotation = `${NoteName}${ChordQuality}`;
+
+
 
 const chords = {
     triad: {

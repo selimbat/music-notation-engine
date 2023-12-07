@@ -15,6 +15,7 @@ const findEnharmony = (value: NoteRelativeValues, targetBareNoteName: BareNoteNa
         return targetBareNoteName;
     }
 
+    // TODO: Find a real fix for this condition
     const shouldSharpen = (value - targetPitch.value) > 6
         ? Math.sign(value - targetPitch.value) * Math.sign(
             (value - targetPitch.value) * ((value + 6) % 12 - (targetPitch.value + 6) % 12)
