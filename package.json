@@ -1,0 +1,26 @@
+{
+  "name": "music-notation-engine",
+  "version": "0.0.0",
+  "description": "Basics for a music notation engine for personal use, maybe generating my own practice exercices.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/selimbat/music-notation-engine.git"
+  },
+  "keywords": [
+    "music",
+    "notation"
+  ],
+  "author": "Selim Tirellil",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/selimbat/music-notation-engine/issues"
+  },
+  "homepage": "https://github.com/selimbat/music-notation-engine#readme",
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
