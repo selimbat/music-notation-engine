@@ -1,4 +1,3 @@
-import { NoteName, orderedNotes } from "./definitions";
 import intervals, { getIntervalNote } from "./intervals";
 import Pitch from "./pitch";
 import { Chord, ChordQuality, Interval } from "./types";
