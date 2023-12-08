@@ -16,6 +16,7 @@ const chords: Record<ChordQuality, Chord> = {
     'sus2': [intervals[1].perfect, intervals[2].major, intervals[5].perfect],
     'sus4': [intervals[1].perfect, intervals[4].perfect, intervals[5].perfect],
     'maj7': [intervals[1].perfect, intervals[3].major, intervals[5].perfect, intervals[7].major],
+    '6': [intervals[1].perfect, intervals[3].major, intervals[5].perfect, intervals[6].major],
     '7': [intervals[1].perfect, intervals[3].major, intervals[5].perfect, intervals[7].minor],
     '-7': [intervals[1].perfect, intervals[3].minor, intervals[5].perfect, intervals[7].minor],
     '-maj7': [intervals[1].perfect, intervals[3].minor, intervals[5].perfect, intervals[7].major],

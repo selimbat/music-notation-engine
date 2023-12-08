@@ -46,7 +46,17 @@ export default class Pitch {
     }
 
     getOctave(): Octave {
-        return Math.floor(this.value / 12) as Octave;
+        const octave = Math.floor(this.value / 12) as Octave;
+
+        // Ugly fix but western music theory is messed up (and we love it anyway)
+        if (this.name.startsWith('B#')) {
+            return octave - 1 as Octave;
+        }
+        if (this.name.startsWith('Cb')) {
+            return octave + 1 as Octave;
+        }
+
+        return octave;
     }
 
     isSamePitch(other: Pitch) {
@@ -55,6 +65,10 @@ export default class Pitch {
 
     isSameRelativePitch(other: Pitch) {
         return this.value % 12 === other.value % 12;
+    }
+
+    toString() {
+        return `${this.name}${this.getOctave()}`;
     }
 }
 

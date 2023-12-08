@@ -32,6 +32,7 @@ export default class NotationBuilder {
     clef: Clef;
     notes: Note[];
     barLength: number;
+    nbBarsPerLine: number;
     // @ts-expect-error This property is defined through a method called in the constructor
     accidentals: Accidentals;
 
@@ -40,6 +41,7 @@ export default class NotationBuilder {
 
         const [upper, lower] = meter.split('/');
         this.barLength = parseInt(upper) / parseFloat(lower);
+        this.nbBarsPerLine = 4;
 
         this.key = key;
         this.clef = clef;
@@ -72,11 +74,17 @@ export default class NotationBuilder {
         let result = '';
 
         let currentBarLength = 0;
+        let nbBuiltBars = 0;
 
         this.notes.forEach(note => {
             if (currentBarLength === this.barLength) {
                 // Current bar is full.
                 result += ' | ';
+                if (nbBuiltBars % this.nbBarsPerLine === this.nbBarsPerLine - 1) {
+                    result += '\n';
+                }
+                nbBuiltBars += 1;
+
                 currentBarLength = 0;
                 this.resetAccidentals();
             }
@@ -96,9 +104,16 @@ export default class NotationBuilder {
             const noteToFullBar = new Note(remainingInBar, note.pitch);
             const noteNextBar = new Note(note.duration - remainingInBar as NoteDuration, note.pitch);
 
-            result += `(${noteToFullBar.toABCMusicString(this.accidentals)
-                } | ${noteNextBar.toABCMusicString(this.accidentals)
-                })`
+            result += '(';
+            result += noteToFullBar.toABCMusicString(this.accidentals);
+            result += ' | ';
+
+            if (nbBuiltBars % this.nbBarsPerLine === this.nbBarsPerLine - 1) {
+                result += '\n';
+            }
+            nbBuiltBars += 1;
+
+            result += noteNextBar.toABCMusicString(this.accidentals);
 
             currentBarLength = Math.min(this.barLength, noteNextBar.duration);
             this.resetAccidentals();

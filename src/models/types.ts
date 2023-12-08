@@ -12,11 +12,11 @@ export type Interval<T extends IntervalTypes = IntervalTypes> = {
 }
 
 type Triad = readonly [Interval<1>, Interval<2 | 3 | 4>, Interval<5>];
-type Tetrad = readonly [Interval<1>, Interval<2 | 3 | 4>, Interval<5>, Interval<7>];
+type Tetrad = readonly [Interval<1>, Interval<2 | 3 | 4>, Interval<5>, Interval<6 | 7>];
 export type Chord = Triad | Tetrad;
 
 type TriadChordQuality = '' | '-' | 'aug' | 'dim' | 'sus2' | 'sus4';
-type SeventhChordQuality = '7' | 'maj7' | '-7' | '-maj7' | 'ø' | 'dim7' | '7sus2' | '7sus4';
+type SeventhChordQuality = '6' | '7' | 'maj7' | '-7' | '-maj7' | 'ø' | 'dim7' | '7sus2' | '7sus4';
 export type ChordQuality = TriadChordQuality | SeventhChordQuality
 
 

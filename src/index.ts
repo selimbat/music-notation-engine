@@ -3,9 +3,11 @@ import Pitch from "./models/pitch";
 import chords from "./models/chords";
 import scales, { getNotesOfScale } from "./models/scales";
 import ChordParser from "./models/chordParser";
-import { ChordNotation } from "./models/types";
+import { ChordNotation, Interval } from "./models/types";
 import Note from "./models/note";
 import NotationBuilder from "./models/notationBuilder";
+import intervals, { getIntervalNote } from "./models/intervals";
+import SimpleWalkingBassGenerator from "./models/simpleWalkingBass";
 
 
 ['C', 'Cdim', 'Cmaj7', 'C7', 'Cø', 'C-maj7', 'Caug', 'C-'].forEach((ch) => {
@@ -37,18 +39,36 @@ import NotationBuilder from "./models/notationBuilder";
     console.log(`ABCMusic notation for major scale of ${r} is ${ABCBuilder.toString()}`);
 });
 
-const ABCBuilder = new NotationBuilder();
-[ // Basic 12-bar blues in C
-    'C7', 'C7', 'C7', 'C7',
-    'F7', 'F7', 'C7', 'C7',
-    'G7', 'F7', 'C7', 'C7',
-].forEach(ch => {
-    const [root, chord] = ChordParser.parse(ch as ChordNotation);
-    const chordTones = getNotesOfChord(chord, new Pitch(root)).map(p => new Note(0.25, p));
+const allOfMe = [
+    'Cmaj7', '%', 'E7', '%',
+    'A7', '%', 'D-', '%',
+    'E7', '%', 'A-', '%',
+    'D7', '%', 'D-7', 'G7',
 
-    console.log(`Notes for chord ${ch} are ${chordTones.map((n) => n.pitch?.name + '-' + n.pitch?.getOctave()).join(', ')}`)
-    ABCBuilder.addNotes(...chordTones);
-})
+    'Cmaj7', '%', 'E7', '%',
+    'A7', '%', 'D-', '%',
+    'F', 'F-', 'Cmaj7', 'A7',
+    'D-7', 'G7', 'C6', '%',
+] as const
 
-console.log(`ABCMusic notation a 12-bar blues in C is:`);
-console.log(ABCBuilder.toString());
+const beautifulLove = [
+    'Eø', 'A7', 'D-', '%',
+    'G-7', 'C7', 'Fmaj7', 'Eø',
+    'D-', 'G-7', 'Bb7', 'Eø',
+    'D-', 'G7', 'Eø', 'A7',
+
+    'Eø', 'A7', 'D-', '%',
+    'G-7', 'C7', 'Fmaj7', 'Eø',
+    'D-', 'G-7', 'Bb7', 'Eø',
+    'D-', 'Bb7', 'D-', '%',
+] as const
+
+const myChanges = [
+    'Eaug', 'F-7', 'Bb7', 'Eb-7',
+    'Fb-', '%', 'A', 'D'
+] as const
+
+
+const walkingBass = new SimpleWalkingBassGenerator(myChanges, intervals[8].perfect);
+console.log(`ABCMusic notation of Beautiful Love is:`);
+console.log(walkingBass.walk());
