@@ -2,30 +2,28 @@ import { BareNoteName, NoteName, NoteRelativeValues, orderedNotes } from "./defi
 import Pitch from "./pitch";
 import { Interval, IntervalTypes } from "./types";
 
+
+const getTonalDistance = (a: NoteRelativeValues, b: NoteRelativeValues): number => {
+    const dist = (b - a + 6) % 12 - 6;
+    return dist < -6 ? dist + 12 : dist;
+}
+
 const findEnharmony = (value: NoteRelativeValues, targetBareNoteName: BareNoteName): `${NoteName}${'' | '#' | 'b'}` => {
     const targetPitch = new Pitch(targetBareNoteName, 0);
-
-    const distance = Math.min(
-        Math.abs(targetPitch.value - value),
-        Math.abs((targetPitch.value + 6) % 12 - (value + 6) % 12)
-    );
 
     const currentPitch = new Pitch(value);
     if (targetPitch.isSameRelativePitch(currentPitch)) {
         return targetBareNoteName;
     }
 
-    // TODO: Find a real fix for this condition
-    const shouldSharpen = (value - targetPitch.value) > 6
-        ? Math.sign(value - targetPitch.value) * Math.sign(
-            (value - targetPitch.value) * ((value + 6) % 12 - (targetPitch.value + 6) % 12)
-        )
-        : Math.sign(value - targetPitch.value)
+    const dist = getTonalDistance(value, targetPitch.value % 12 as NoteRelativeValues);
+    const shouldSharpen = dist < 0;
+    const nbSemitones = Math.abs(dist);
 
-    if (shouldSharpen === 1) {
-        return targetBareNoteName.padEnd(distance + 1, '#') as `${NoteName}${'' | '#' | 'b'}`;
+    if (shouldSharpen) {
+        return targetBareNoteName.padEnd(nbSemitones + 1, '#') as `${NoteName}${'' | '#' | 'b'}`;
     }
-    return targetBareNoteName.padEnd(distance + 1, 'b') as `${NoteName}${'' | '#' | 'b'}`;
+    return targetBareNoteName.padEnd(nbSemitones + 1, 'b') as `${NoteName}${'' | '#' | 'b'}`;
 }
 
 const getSemitoneForInterval = (i: IntervalTypes): number => {
