@@ -1,5 +1,5 @@
 import { BareNoteName } from "./definitions";
-import { ABCMusicAccidentals, Accidentals } from "./notationBuilder";
+import { ABCMusicAccidentals, ABCMusicOctaveSymbols, Accidentals } from "./notationBuilder";
 import Pitch from "./pitch";
 
 type UndottedNoteDuration = 0.125 | 0.25 | 0.5 | 1 | 2 | 4;
@@ -41,15 +41,16 @@ export default class Note {
         const accidental = this.pitch.name.split('').find(c => ['#', 'b'].includes(c));
         const currentAccidental = accidentals[noteName];
 
+        const result = `${noteName}${ABCMusicOctaveSymbols[this.pitch.getOctave()]}${noteDurationStr}`;
         if (currentAccidental === '') {
             if (accidental) {
-                return `${ABCMusicAccidentals[accidental as '#' | 'b']}${noteName}${noteDurationStr}`
+                return `${ABCMusicAccidentals[accidental as '#' | 'b']}${result}`
             }
-            return `${noteName}${noteDurationStr}`;
+            return result;
         }
         if (currentAccidental !== accidental) {
-            return `${accidental === undefined ? '=' : ABCMusicAccidentals[accidental as '#' | 'b']}${noteName}${noteDurationStr}`;
+            return `${accidental === undefined ? '=' : ABCMusicAccidentals[accidental as '#' | 'b']}${result}`;
         }
-        return `${noteName}${noteDurationStr}`;
+        return result;
     }
 }

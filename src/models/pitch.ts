@@ -1,4 +1,5 @@
 import { NoteName, noteNameFromRelativeValue, noteRelativeValues, NoteRelativeValues } from "./definitions";
+import { Octave } from "./types";
 
 
 const resolveEnharmony = (value: string, depth: number = 0): NoteRelativeValues => {
@@ -44,8 +45,8 @@ export default class Pitch {
         return noteNameFromRelativeValue[this.value % 12 as NoteRelativeValues];
     }
 
-    getOctave(): number {
-        return Math.floor(this.value / 12);
+    getOctave(): Octave {
+        return Math.floor(this.value / 12) as Octave;
     }
 
     isSamePitch(other: Pitch) {

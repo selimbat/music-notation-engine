@@ -1,5 +1,6 @@
 import { BareNoteName, NoteName, orderedNotes } from "./definitions";
 import Note, { NoteDuration } from "./note";
+import { Octave } from "./types";
 
 type MeterLower = 1 | 2 | 4 | 8;
 type Meter = `${number}/${MeterLower}`
@@ -10,6 +11,18 @@ export type Accidentals = Record<BareNoteName, '#' | 'b' | ''>;
 export const ABCMusicAccidentals: Record<'#' | 'b', '^' | '_'> = {
     '#': '^',
     'b': '_',
+}
+
+export const ABCMusicOctaveSymbols: Record<Octave, string> = {
+    0: ',,,,',
+    1: ',,,',
+    2: ',,',
+    3: ',',
+    4: '',
+    5: '\'',
+    6: '\'\'',
+    7: '\'\'\'',
+    8: '\'\'\'\'',
 }
 
 export default class NotationBuilder {

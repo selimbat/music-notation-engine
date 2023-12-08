@@ -58,7 +58,7 @@ export const getIntervalNote = (root: Pitch, interval: Interval, direction: 'up'
                 (((root.value + dir * semitones) % 12) + 12) % 12 as NoteRelativeValues,
                 targetNote,
             ),
-            root.getOctave(),
+            Math.floor((root.value + dir * semitones) / 12),
         );
     }
     let pitchDelta = 0;
@@ -83,7 +83,7 @@ export const getIntervalNote = (root: Pitch, interval: Interval, direction: 'up'
             (((root.value + dir * (semitones + pitchDelta)) % 12) + 12) % 12 as NoteRelativeValues,
             targetNote
         ),
-        root.getOctave(),
+        Math.floor((root.value + dir * (semitones + pitchDelta)) / 12),
     );
 }
 
