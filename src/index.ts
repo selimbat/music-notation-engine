@@ -1,13 +1,11 @@
 import { getNotesOfChord } from "./models/chords";
 import Pitch from "./models/pitch";
-import chords from "./models/chords";
 import scales, { getNotesOfScale } from "./models/scales";
 import ChordParser from "./models/chordParser";
-import { ChordNotation, Interval } from "./models/types";
+import { ChordNotation } from "./models/types";
 import Note from "./models/note";
 import NotationBuilder from "./models/notationBuilder";
-import intervals, { getIntervalNote } from "./models/intervals";
-import SimpleWalkingBassGenerator from "./models/walkers/simpleWalkingBass";
+import intervals from "./models/intervals";
 import WanderingWalkingBassGenerator from "./models/walkers/wanderingWalkingBass";
 
 
@@ -69,7 +67,13 @@ const myChanges = [
     'Fb-', '%', 'A', 'D'
 ] as const
 
+const twelveBarBlues = [
+    'Bb7', '%', '%', '%',
+    'Eb7', '%', 'Bb7', '%',
+    'F7', 'Eb7', 'Bb7', '%',
+] as const
 
-const walkingBass = new WanderingWalkingBassGenerator(beautifulLove, intervals[8].perfect);
-console.log(`ABCMusic notation of Beautiful Love is:`);
+
+const walkingBass = new WanderingWalkingBassGenerator(allOfMe, intervals[8].perfect);
+console.log(`ABCMusic notation of all of me is:`);
 console.log(walkingBass.walk());

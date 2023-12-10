@@ -33,7 +33,7 @@ export default class Note {
     }
 
     public toString() {
-        return `${this.pitch?.name ?? 'z'}-${this.duration}`;
+        return `${this.pitch?.name ?? 'z'}${this.pitch?.getOctave() ?? ''}-${this.duration}`;
     }
 
     public toABCMusicString(accidentals: Accidentals, defaultNoteLength = 0.25) {

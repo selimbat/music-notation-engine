@@ -9,6 +9,8 @@ import { ChordNotation, Interval } from "../types";
 import AbstractWalkingBassGenerator, { RepeatChord } from "./abstractWalkingBass";
 
 export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGenerator {
+    // Builds a walking bass that plays the chord tones, starting from the root
+    // and aiming for the root of the next chord.
     // Only works for 4/4.
 
     private maxRange: Pitch;
@@ -17,7 +19,7 @@ export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGe
     constructor(changes: readonly (ChordNotation | RepeatChord)[], transposition: Interval = intervals[1].perfect) {
         super(changes, transposition);
 
-        this.maxRange = new Pitch('A', 4);
+        this.maxRange = new Pitch('F', 4);
         this.minRange = new Pitch('E', 2);
     }
 
@@ -49,28 +51,44 @@ export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGe
     }
 
     public walk(): string {
-        let previousChord: ChordNotation | RepeatChord | null = null;
         const ABCBuilder = new NotationBuilder();
 
+        const fullRange = (this.maxRange.value - this.minRange.value);
+
+        let previousChord: ChordNotation | RepeatChord | null = null;
         let previous4thBeat: Pitch | null;
+        let previousDirection: 'up' | 'down' = 'down';
 
         this.chordChanges.forEach((ch, i) => {
             const chordSymbol = ch === '%' && previousChord ? previousChord : ch;
             const [root, chord] = ChordParser.parse(chordSymbol as ChordNotation);
 
-            let chordTones = getNotesOfChord(chord, this.getRootOfChord(root, previous4thBeat)).map(p => new Note(0.25, p));
+            const rootPitch = this.getRootOfChord(root, previous4thBeat);
+
+            let chordTones = getNotesOfChord(
+                chord,
+                rootPitch,
+            ).map(p => new Note(0.25, p));
 
             const canGoUp = chordTones.every(t => !t.pitch || this.isInRange(t.pitch));
 
-            if (!canGoUp) {
+            const distFromMinRange = (rootPitch.value - this.minRange.value) / fullRange;
+            const isInUpperHalf = distFromMinRange > 0.5;
+
+            if (!canGoUp || (isInUpperHalf && previousDirection === 'up')) {
                 // Change the order of the notes to play 1 (-> 7) -> 5 -> 3 instead of 1 -> 3 -> 5 (-> 7)
                 // And also lower the notes by one octave
-                chordTones = [chordTones.shift()!, ...chordTones.reverse()].map((t, i) => {
+                const descendingChordTones = [chordTones.shift()!, ...chordTones.reverse()].map((t, i) => {
                     if (i === 0 || !t.pitch) {
                         return t;
                     }
                     return new Note(t.duration, t.pitch.name, t.pitch.getOctave() - 1);
-                })
+                });
+
+                chordTones = descendingChordTones;
+                previousDirection = 'down';
+            } else {
+                previousDirection = 'up';
             }
 
             let nextChordSymbol: ChordNotation | RepeatChord | null = null;
@@ -85,7 +103,7 @@ export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGe
                     nextChord, new Pitch(nextRoot)
                 ).find(Boolean);
 
-                let chordToneClosestToNextRoot: Note | null = null;
+                let chordToneClosestToNextRoot: Note | null = null as Note | null;
                 let minDist = Infinity;
                 chordTones.forEach((t, i) => {
                     if (i === 0) return; // We don't want to consider the root
@@ -100,9 +118,23 @@ export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGe
                     }
                 });
 
-                if (chordToneClosestToNextRoot !== null) {
-                    // Set fourth beat
-                    chordTones[3] = chordToneClosestToNextRoot;
+                if (chordToneClosestToNextRoot) {
+                    if (getTonalDistance(
+                        rootPitch.value % 12 as NoteRelativeValues,
+                        chordToneClosestToNextRoot.pitch?.value! % 12 as NoteRelativeValues,
+                    ) === -5) {
+                        // The chord tone closest to the next chord root is the fifth.
+                        const nextRootCorrectedForOctave = this.getRootOfChord(
+                            nextChordRootPitch!.name as NoteName,
+                            chordToneClosestToNextRoot.pitch
+                        );
+                        const chromaticApproachPitch = new Pitch(nextRootCorrectedForOctave!.value - 1)
+
+                        chordTones[3] = new Note(0.25, chromaticApproachPitch);
+                    } else {
+                        // Set fourth beat
+                        chordTones[3] = chordToneClosestToNextRoot;
+                    }
                 }
             }
 
@@ -123,7 +155,7 @@ export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGe
 
             ABCBuilder.addNotes(...chordTones);
             previousChord = chordSymbol;
-            previous4thBeat = chordTones[3].pitch;
+            previous4thBeat = chordTones[chordTones.length - 1].pitch;
         })
 
         return ABCBuilder.toString();
