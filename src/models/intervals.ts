@@ -3,7 +3,7 @@ import Pitch from "./pitch";
 import { Interval, IntervalTypes } from "./types";
 
 
-const getTonalDistance = (a: NoteRelativeValues, b: NoteRelativeValues): number => {
+export const getTonalDistance = (a: NoteRelativeValues, b: NoteRelativeValues): number => {
     const dist = (b - a + 6) % 12 - 6;
     return dist < -6 ? dist + 12 : dist;
 }

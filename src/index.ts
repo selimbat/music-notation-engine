@@ -7,7 +7,8 @@ import { ChordNotation, Interval } from "./models/types";
 import Note from "./models/note";
 import NotationBuilder from "./models/notationBuilder";
 import intervals, { getIntervalNote } from "./models/intervals";
-import SimpleWalkingBassGenerator from "./models/simpleWalkingBass";
+import SimpleWalkingBassGenerator from "./models/walkers/simpleWalkingBass";
+import WanderingWalkingBassGenerator from "./models/walkers/wanderingWalkingBass";
 
 
 ['C', 'Cdim', 'Cmaj7', 'C7', 'Cø', 'C-maj7', 'Caug', 'C-'].forEach((ch) => {
@@ -69,6 +70,6 @@ const myChanges = [
 ] as const
 
 
-const walkingBass = new SimpleWalkingBassGenerator(myChanges, intervals[8].perfect);
+const walkingBass = new WanderingWalkingBassGenerator(beautifulLove, intervals[8].perfect);
 console.log(`ABCMusic notation of Beautiful Love is:`);
 console.log(walkingBass.walk());

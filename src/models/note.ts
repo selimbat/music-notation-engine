@@ -57,4 +57,8 @@ export default class Note {
         const accompaniment = this.accompaniment ? `"${this.accompaniment}"` : '';
         return `${accompaniment}${accidental}${result}`;
     }
+
+    public copy() {
+        return new Note(this.duration, this.pitch);
+    }
 }
