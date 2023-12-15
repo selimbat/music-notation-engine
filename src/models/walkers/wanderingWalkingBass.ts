@@ -1,5 +1,5 @@
 import ChordParser from "../chordParser";
-import chords, { getNotesOfChord } from "../chords";
+import chords, { getNotesOfChord, transposeChordNotation } from "../chords";
 import { NoteName, NoteRelativeValues } from "../definitions";
 import intervals, { getIntervalNote, getTonalDistance } from "../intervals";
 import NotationBuilder from "../notationBuilder";
@@ -60,7 +60,9 @@ export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGe
         let previousDirection: 'up' | 'down' = 'down';
 
         this.chordChanges.forEach((ch, i) => {
-            const chordSymbol = ch === '%' && previousChord ? previousChord : ch;
+            const transposedChordSymbol = transposeChordNotation(ch, intervals[2].major);
+
+            const chordSymbol = transposedChordSymbol === '%' && previousChord ? previousChord : transposedChordSymbol;
             const [root, chord] = ChordParser.parse(chordSymbol as ChordNotation);
 
             const rootPitch = this.getRootOfChord(root, previous4thBeat);
@@ -138,8 +140,8 @@ export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGe
                 }
             }
 
-            if (ch !== previousChord && ch !== '%') {
-                chordTones[0].setAccompaniment(ch);
+            if (transposedChordSymbol !== previousChord && transposedChordSymbol !== '%') {
+                chordTones[0].setAccompaniment(transposedChordSymbol);
             }
 
             if (chordTones.length === 3) {

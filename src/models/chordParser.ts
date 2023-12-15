@@ -4,7 +4,7 @@ import { ChordFormula, ChordNotation, ChordQuality } from "./types";
 
 
 class ChordParser {
-    public static parse(chordNotation: ChordNotation): [NoteName, ChordFormula] {
+    public static parse(chordNotation: ChordNotation): [NoteName, ChordFormula, ChordQuality] {
         if (!chordNotation) {
             throw new TypeError("Empty chord notation.");
         }
@@ -20,7 +20,7 @@ class ChordParser {
             throw new TypeError(`Unknown chord quality ${chordNotation}.`);
         }
         const chord = chords[quality as ChordQuality];
-        return [root, chord];
+        return [root, chord, quality as ChordQuality];
     }
 }
 

@@ -74,12 +74,6 @@ const changesBySong: Record<string, readonly (ChordNotation | RepeatChord)[]> = 
     ],
 };
 
-const textEl = document.createTextNode("ABCMusic notation of 'All of Me' is:");
-document.body.appendChild(textEl);
-
-const renderEl = document.createElement('div');
-document.body.appendChild(renderEl);
-
 type SelectOption = {
     value: string;
     label: string;
@@ -115,3 +109,7 @@ function drawNotation() {
 }
 
 buildSelect("songSelect", "Grille :", Object.keys(changesBySong).map(k => ({ value: k, label: k })), drawNotation);
+
+
+const renderEl = document.createElement('div');
+document.body.appendChild(renderEl);

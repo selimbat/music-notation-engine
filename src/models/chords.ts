@@ -1,13 +1,27 @@
 import ChordParser from "./chordParser";
-import { NoteName } from "./definitions";
-import intervals, { getIntervalNote } from "./intervals";
+import { NoteName, NoteRelativeValues } from "./definitions";
+import intervals, { getIntervalNote, getTonalDistance } from "./intervals";
 import Pitch from "./pitch";
 import { ChordFormula, ChordNotation, ChordQuality, Interval } from "./types";
+import { RepeatChord } from "./walkers/abstractWalkingBass";
 
 export const getNotesOfChord = (chord: ChordFormula, root: Pitch): Pitch[] => {
     return chord.map((i: Interval) => {
         return getIntervalNote(root, i);
     })
+}
+
+export const transposeChordNotation = (
+    chordNotation: ChordNotation | RepeatChord,
+    interval: Interval
+): ChordNotation | RepeatChord => {
+    if (chordNotation === '%') {
+        return chordNotation;
+    }
+    const [root, _, quality] = ChordParser.parse(chordNotation);
+    const rootPitch = new Pitch(root);
+    const transposedRootPitch = getIntervalNote(rootPitch, interval);
+    return `${transposedRootPitch.name}${quality}` as ChordNotation;
 }
 
 const chords: Record<ChordQuality, ChordFormula> = {
