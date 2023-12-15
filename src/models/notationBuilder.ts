@@ -71,7 +71,7 @@ export default class NotationBuilder {
     }
 
     public toString() {
-        let result = '';
+        let result = 'L: 1/4\n';
 
         if (this.clef === 'bass') {
             result += 'V: tr clef=bass\n'

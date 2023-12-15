@@ -2,98 +2,6 @@ import { BareNoteName, NoteName, NoteRelativeValues, orderedNotes } from "./defi
 import Pitch from "./pitch";
 import { Interval, IntervalTypes } from "./types";
 
-
-export const getTonalDistance = (a: NoteRelativeValues, b: NoteRelativeValues): number => {
-    const dist = (b - a + 6) % 12 - 6;
-    return dist < -6 ? dist + 12 : dist;
-}
-
-const findEnharmony = (value: NoteRelativeValues, targetBareNoteName: BareNoteName): `${NoteName}${'' | '#' | 'b'}` => {
-    const targetPitch = new Pitch(targetBareNoteName, 0);
-
-    const currentPitch = new Pitch(value);
-    if (targetPitch.isSameRelativePitch(currentPitch)) {
-        return targetBareNoteName;
-    }
-
-    const dist = getTonalDistance(value, targetPitch.value % 12 as NoteRelativeValues);
-    const shouldSharpen = dist < 0;
-    const nbSemitones = Math.abs(dist);
-
-    if (shouldSharpen) {
-        return targetBareNoteName.padEnd(nbSemitones + 1, '#') as `${NoteName}${'' | '#' | 'b'}`;
-    }
-    return targetBareNoteName.padEnd(nbSemitones + 1, 'b') as `${NoteName}${'' | '#' | 'b'}`;
-}
-
-const getSemitoneForInterval = (i: IntervalTypes): number => {
-    if (i > 8) {
-        return 12 + getSemitoneForInterval(i - 7 as IntervalTypes);
-    }
-    const st = (i - 2) * 2 + 2;
-    const reduction = Math.floor(i / 4);
-    return st - reduction;
-}
-
-function intervalCanBePerfect(interval: Interval): interval is Interval<1 | 4 | 5 | 8 | 11> {
-    return [1, 4, 5, 8, 11].includes(interval.intervalType);
-}
-
-export const getIntervalNote = (root: Pitch, interval: Interval, direction: 'up' | 'down' = 'up'): Pitch => {
-    const semitones = getSemitoneForInterval(interval.intervalType);
-
-    const rootBareNoteName = root.name.replace(/[#b]/g, '') as BareNoteName;
-    const rootIndex = orderedNotes.indexOf(rootBareNoteName);
-    if (rootIndex === -1) {
-        throw new Error(`Could not find bare note name for ${root.name}`);
-    }
-    const dir: -1 | 1 = direction === 'up' ? 1 : -1;
-
-    const targetNoteIndex = ((rootIndex + dir * (interval.intervalType - 1) % 7) + 7) % 7;
-    const targetNote = orderedNotes[targetNoteIndex];
-
-    if (['major', 'perfect'].includes(interval.quality)) {
-        return new Pitch(
-            findEnharmony(
-                (((root.value + dir * semitones) % 12) + 12) % 12 as NoteRelativeValues,
-                targetNote,
-            ),
-            Math.floor((root.value + dir * semitones) / 12),
-        );
-    }
-    let pitchDelta = 0;
-    if (intervalCanBePerfect(interval)) {
-        pitchDelta = interval.quality === 'augmented' ? 1 : -1;
-    } else {
-        switch (interval.quality) {
-            case 'minor':
-                pitchDelta = -1;
-                break;
-            case 'augmented':
-                pitchDelta = 1;
-                break;
-            case 'diminished':
-                pitchDelta = -2;
-                break;
-        }
-    }
-
-    return new Pitch(
-        findEnharmony(
-            (((root.value + dir * (semitones + pitchDelta)) % 12) + 12) % 12 as NoteRelativeValues,
-            targetNote
-        ),
-        Math.floor((root.value + dir * (semitones + pitchDelta)) / 12),
-    );
-}
-
-
-type Intervals = {
-    [K in IntervalTypes]: {
-        [q in Interval<K>['quality']]: Interval<K>;
-    };
-}
-
 const intervals: Intervals = {
     1: {
         diminished: { intervalType: 1, quality: 'diminished' },
@@ -157,5 +65,115 @@ const intervals: Intervals = {
         augmented: { intervalType: 13, quality: 'augmented' },
     },
 };
+
+export const getTonalDistance = (a: NoteRelativeValues, b: NoteRelativeValues): number => {
+    const dist = (b - a + 6) % 12 - 6;
+    return dist < -6 ? dist + 12 : dist;
+}
+
+const findEnharmony = (value: NoteRelativeValues, targetBareNoteName: BareNoteName): `${NoteName}${'' | '#' | 'b'}` => {
+    const targetPitch = new Pitch(targetBareNoteName, 0);
+
+    const currentPitch = new Pitch(value);
+    if (targetPitch.isSameRelativePitch(currentPitch)) {
+        return targetBareNoteName;
+    }
+
+    const dist = getTonalDistance(value, targetPitch.value % 12 as NoteRelativeValues);
+    const shouldSharpen = dist < 0;
+    const nbSemitones = Math.abs(dist);
+
+    if (shouldSharpen) {
+        return targetBareNoteName.padEnd(nbSemitones + 1, '#') as `${NoteName}${'' | '#' | 'b'}`;
+    }
+    return targetBareNoteName.padEnd(nbSemitones + 1, 'b') as `${NoteName}${'' | '#' | 'b'}`;
+}
+
+const getSemitonesForInterval = (i: IntervalTypes): number => {
+    if (i > 8) {
+        return 12 + getSemitonesForInterval(i - 7 as IntervalTypes);
+    }
+    const st = (i - 2) * 2 + 2;
+    const reduction = Math.floor(i / 4);
+    return st - reduction;
+}
+const intervalsBySemitone = {
+    0: intervals[1].perfect,
+    1: intervals[2].minor,
+    2: intervals[2].major,
+    3: intervals[3].minor,
+    4: intervals[3].major,
+    5: intervals[4].perfect,
+    6: intervals[5].diminished,
+    7: intervals[5].perfect,
+    8: intervals[6].minor,
+    9: intervals[6].major,
+    10: intervals[7].minor,
+    11: intervals[7].major,
+} as const;
+
+export const getIntervalForSemitones = (semitones: NoteRelativeValues): Interval => {
+    return intervalsBySemitone[semitones];
+}
+
+function intervalCanBePerfect(interval: Interval): interval is Interval<1 | 4 | 5 | 8 | 11> {
+    return [1, 4, 5, 8, 11].includes(interval.intervalType);
+}
+
+export const getIntervalNote = (root: Pitch, interval: Interval, direction: 'up' | 'down' = 'up'): Pitch => {
+    const semitones = getSemitonesForInterval(interval.intervalType);
+
+    const rootBareNoteName = root.name.replace(/[#b]/g, '') as BareNoteName;
+    const rootIndex = orderedNotes.indexOf(rootBareNoteName);
+    if (rootIndex === -1) {
+        throw new Error(`Could not find bare note name for ${root.name}`);
+    }
+    const dir: -1 | 1 = direction === 'up' ? 1 : -1;
+
+    const targetNoteIndex = ((rootIndex + dir * (interval.intervalType - 1) % 7) + 7) % 7;
+    const targetNote = orderedNotes[targetNoteIndex];
+
+    if (['major', 'perfect'].includes(interval.quality)) {
+        return new Pitch(
+            findEnharmony(
+                (((root.value + dir * semitones) % 12) + 12) % 12 as NoteRelativeValues,
+                targetNote,
+            ),
+            Math.floor((root.value + dir * semitones) / 12),
+        );
+    }
+    let pitchDelta = 0;
+    if (intervalCanBePerfect(interval)) {
+        pitchDelta = interval.quality === 'augmented' ? 1 : -1;
+    } else {
+        switch (interval.quality) {
+            case 'minor':
+                pitchDelta = -1;
+                break;
+            case 'augmented':
+                pitchDelta = 1;
+                break;
+            case 'diminished':
+                pitchDelta = -2;
+                break;
+        }
+    }
+
+    return new Pitch(
+        findEnharmony(
+            (((root.value + dir * (semitones + pitchDelta)) % 12) + 12) % 12 as NoteRelativeValues,
+            targetNote
+        ),
+        Math.floor((root.value + dir * (semitones + pitchDelta)) / 12),
+    );
+}
+
+
+type Intervals = {
+    [K in IntervalTypes]: {
+        [q in Interval<K>['quality']]: Interval<K>;
+    };
+}
+
 
 export default intervals;

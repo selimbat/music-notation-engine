@@ -60,7 +60,7 @@ export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGe
         let previousDirection: 'up' | 'down' = 'down';
 
         this.chordChanges.forEach((ch, i) => {
-            const transposedChordSymbol = transposeChordNotation(ch, intervals[1].perfect);
+            const transposedChordSymbol = transposeChordNotation(ch, this.transpositionInterval);
 
             const chordSymbol = transposedChordSymbol === '%' && previousChord ? previousChord : transposedChordSymbol;
             const [root, chord] = ChordParser.parse(chordSymbol as ChordNotation);
