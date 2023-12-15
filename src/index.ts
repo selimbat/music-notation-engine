@@ -7,9 +7,7 @@ import Note from "./models/note";
 import NotationBuilder from "./models/notationBuilder";
 import intervals from "./models/intervals";
 import WanderingWalkingBassGenerator from "./models/walkers/wanderingWalkingBass";
-
-
-const renderEl = document.createElement('div');
+import { renderAbc } from "abcjs";
 
 
 ['C', 'Cdim', 'Cmaj7', 'C7', 'Cø', 'C-maj7', 'Caug', 'C-'].forEach((ch) => {
@@ -77,6 +75,11 @@ const twelveBarBlues = [
 ] as const
 
 
+const textEl = document.createTextNode("ABCMusic notation of 'All of Me' is:");
+document.body.appendChild(textEl);
+
+const renderEl = document.createElement('div');
+document.body.appendChild(renderEl);
+
 const walkingBass = new WanderingWalkingBassGenerator(allOfMe, intervals[8].perfect);
-console.log(`ABCMusic notation of all of me is:`);
-console.log(walkingBass.walk());
+renderAbc(renderEl, walkingBass.walk());

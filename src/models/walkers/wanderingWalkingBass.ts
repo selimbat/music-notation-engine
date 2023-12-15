@@ -51,7 +51,7 @@ export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGe
     }
 
     public walk(): string {
-        const ABCBuilder = new NotationBuilder();
+        const ABCBuilder = new NotationBuilder("4/4", "C", "bass");
 
         const fullRange = (this.maxRange.value - this.minRange.value);
 

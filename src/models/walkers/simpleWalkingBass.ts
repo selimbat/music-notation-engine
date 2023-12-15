@@ -15,7 +15,7 @@ export default class SimpleWalkingBassGenerator extends AbstractWalkingBassGener
 
     public walk(): string {
         let previousChord: ChordNotation | RepeatChord | null = null;
-        const ABCBuilder = new NotationBuilder();
+        const ABCBuilder = new NotationBuilder("4/4", "C", "bass");
         this.chordChanges.forEach(ch => {
             const chordSymbol = ch === '%' ? previousChord : ch;
             const [root, chord] = ChordParser.parse(chordSymbol as ChordNotation);

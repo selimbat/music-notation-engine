@@ -73,6 +73,10 @@ export default class NotationBuilder {
     public toString() {
         let result = '';
 
+        if (this.clef === 'bass') {
+            result += 'V: tr clef=bass\n'
+        }
+
         let currentBarLength = 0;
         let nbBuiltBars = 0;
 
