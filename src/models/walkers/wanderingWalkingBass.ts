@@ -84,7 +84,8 @@ export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGe
                     if (i === 0 || !t.pitch) {
                         return t;
                     }
-                    return new Note(t.duration, t.pitch.name, t.pitch.getOctave() - 1);
+                    const octaveShift = t.pitch.name.startsWith('Cb') ? 2 : 1;
+                    return new Note(t.duration, t.pitch.name, t.pitch.getOctave() - octaveShift);
                 });
 
                 chordTones = descendingChordTones;
