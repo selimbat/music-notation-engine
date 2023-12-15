@@ -9,6 +9,9 @@ import intervals from "./models/intervals";
 import WanderingWalkingBassGenerator from "./models/walkers/wanderingWalkingBass";
 
 
+const renderEl = document.createElement('div');
+
+
 ['C', 'Cdim', 'Cmaj7', 'C7', 'Cø', 'C-maj7', 'Caug', 'C-'].forEach((ch) => {
     const [root, chord] = ChordParser.parse(ch as ChordNotation);
     const chordTones = getNotesOfChord(chord, new Pitch(root));

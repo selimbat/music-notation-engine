@@ -4,7 +4,7 @@
   "description": "Basics for a music notation engine for personal use, maybe generating my own practice exercices.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rollup --config"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,9 @@
   },
   "homepage": "https://github.com/selimbat/music-notation-engine#readme",
   "devDependencies": {
+    "@rollup/plugin-typescript": "^11.1.5",
+    "rollup": "^4.9.0",
+    "tslib": "^2.6.2",
     "typescript": "^5.3.3"
   }
 }

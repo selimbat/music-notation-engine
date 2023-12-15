@@ -1,12 +1,12 @@
 import chords from "./chords";
 import { NoteName, orderedNotes } from "./definitions";
-import { Chord, ChordNotation, ChordQuality } from "./types";
+import { ChordFormula, ChordNotation, ChordQuality } from "./types";
 
 
 class ChordParser {
-    public static parse(chordNotation: ChordNotation): [NoteName, Chord] {
+    public static parse(chordNotation: ChordNotation): [NoteName, ChordFormula] {
         if (!chordNotation) {
-            throw new TypeError(`Empty chord notation.`);
+            throw new TypeError("Empty chord notation.");
         }
         if (!(orderedNotes as readonly string[]).includes(chordNotation[0])) {
             throw new TypeError(`Unknown note name ${chordNotation[0]}.`);

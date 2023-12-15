@@ -1,14 +1,16 @@
+import ChordParser from "./chordParser";
+import { NoteName } from "./definitions";
 import intervals, { getIntervalNote } from "./intervals";
 import Pitch from "./pitch";
-import { Chord, ChordQuality, Interval } from "./types";
+import { ChordFormula, ChordNotation, ChordQuality, Interval } from "./types";
 
-export const getNotesOfChord = (chord: Chord, root: Pitch): Pitch[] => {
+export const getNotesOfChord = (chord: ChordFormula, root: Pitch): Pitch[] => {
     return chord.map((i: Interval) => {
         return getIntervalNote(root, i);
     })
 }
 
-const chords: Record<ChordQuality, Chord> = {
+const chords: Record<ChordQuality, ChordFormula> = {
     '': [intervals[1].perfect, intervals[3].major, intervals[5].perfect],
     '-': [intervals[1].perfect, intervals[3].minor, intervals[5].perfect],
     'dim': [intervals[1].perfect, intervals[3].minor, intervals[5].diminished],
@@ -27,3 +29,13 @@ const chords: Record<ChordQuality, Chord> = {
 } as const;
 
 export default chords;
+
+class Chord {
+
+    private root: NoteName;
+    private formula: ChordFormula;
+
+    constructor(notation: ChordNotation) {
+        [this.root, this.formula] = ChordParser.parse(notation);
+    }
+}
