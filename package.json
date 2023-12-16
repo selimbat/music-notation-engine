@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc && rollup --config",
-    "deploy": "cp ./assets/index.html ./dist/index.html && tsc && rollup --config"
+    "deploy": "mkdir ./dist && cp ./assets/index.html ./dist/index.html && tsc && rollup --config"
   },
   "repository": {
     "type": "git",
