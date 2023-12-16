@@ -12,11 +12,19 @@ class ChordParser {
             throw new TypeError(`Unknown note name ${chordNotation[0]}.`);
         }
 
-        const offset = ['b', '#'].includes(chordNotation[1]) ? 2 : 1;
+        let offset = chordNotation.split('').findIndex((c, i) => {
+            if (i === 0) {
+                // The first character is always the note name
+                return false;
+            }
+            return !['b', '#'].includes(c);
+        });
+        offset = offset === -1 ? chordNotation.length : offset;
         const root = chordNotation.substring(0, offset) as NoteName;
 
         const quality = chordNotation.substring(offset);
         if (!Object.keys(chords).includes(quality)) {
+            console.log(quality, offset);
             throw new TypeError(`Unknown chord quality ${chordNotation}.`);
         }
         const chord = chords[quality as ChordQuality];
