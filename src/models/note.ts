@@ -28,7 +28,7 @@ export default class Note {
         this.duration = duration;
     }
 
-    public setAccompaniment(chord: ChordNotation) {
+    public setAccompaniment(chord: ChordNotation | undefined) {
         this.accompaniment = chord;
     }
 

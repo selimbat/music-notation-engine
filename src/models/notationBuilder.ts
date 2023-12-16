@@ -30,7 +30,7 @@ export default class NotationBuilder {
     key: Key;
     tempo?: number;
     clef: Clef;
-    notes: Note[];
+    notes: (Note | Note[])[];
     barLength: number;
     nbBarsPerLine: number;
     // @ts-expect-error This property is defined through a method called in the constructor
@@ -49,7 +49,7 @@ export default class NotationBuilder {
         this.resetAccidentals();
     }
 
-    public addNotes(...note: Note[]) {
+    public addNotes(...note: (Note | Note[])[]) {
         this.notes.push(...note);
     }
 
@@ -93,23 +93,52 @@ export default class NotationBuilder {
                 this.resetAccidentals();
             }
 
-            if (currentBarLength + note.duration <= this.barLength) {
-                // Still room in current bar
-                result += note.toABCMusicString(this.accidentals);
-                currentBarLength += note.duration;
+            if (Array.isArray(note)) {
+                if (new Set(note.map(n => n.duration)).size !== 1) {
+                    throw Error(`Stacked notes have different durations : ${note.map(n => n.toString()).join('-')}.`);
+                }
+            }
+            const toAdd = Array.isArray(note)
+                ? `"${note.find(n => n.accompaniment)?.accompaniment ?? ''}"[${note.map(n => {
+                    n.setAccompaniment(undefined);
+                    return n.toABCMusicString(this.accidentals);
+                }).join('')}]`
+                : note.toABCMusicString(this.accidentals);
+            const duration = Array.isArray(note)
+                ? note[0].duration
+                : note.duration;
 
-                if (note.pitch !== null) {
+            if (currentBarLength + duration <= this.barLength) {
+                // Still room in current bar
+                result += toAdd;
+                currentBarLength += duration;
+
+                if (Array.isArray(note)) {
+                    note.forEach(n => {
+                        this.setAccidental(n);
+                    })
+                } else if (note.pitch !== null) {
                     this.setAccidental(note);
                 }
                 return;
             }
             // Note to add overflows the current bar
             const remainingInBar = this.barLength - currentBarLength as NoteDuration;
-            const noteToFullBar = new Note(remainingInBar, note.pitch);
-            const noteNextBar = new Note(note.duration - remainingInBar as NoteDuration, note.pitch);
+            const toAddToFullBar = Array.isArray(note)
+                ? `"${note.find(n => n.accompaniment)?.accompaniment ?? ''}"[${note
+                    .map(n => new Note(remainingInBar, n.pitch)
+                        .toABCMusicString(this.accidentals))
+                    .join('')}]`
+                : new Note(remainingInBar, note.pitch).toABCMusicString(this.accidentals);
+            const toAddNextBar = Array.isArray(note)
+                ? `[${note
+                    .map(n => new Note(duration - remainingInBar as NoteDuration, n.pitch)
+                        .toABCMusicString(this.accidentals))
+                    .join('')}]`
+                : new Note(duration - remainingInBar as NoteDuration, note.pitch).toABCMusicString(this.accidentals);
 
             result += '(';
-            result += noteToFullBar.toABCMusicString(this.accidentals);
+            result += toAddToFullBar;
             result += ' | ';
 
             if (nbBuiltBars % this.nbBarsPerLine === this.nbBarsPerLine - 1) {
@@ -117,11 +146,18 @@ export default class NotationBuilder {
             }
             nbBuiltBars += 1;
 
-            result += noteNextBar.toABCMusicString(this.accidentals);
+            result += toAddNextBar;
+            result += ')';
 
-            currentBarLength = Math.min(this.barLength, noteNextBar.duration);
+            currentBarLength = Math.min(this.barLength, duration - remainingInBar);
             this.resetAccidentals();
-            this.setAccidental(note);
+            if (Array.isArray(note)) {
+                note.forEach(n => {
+                    this.setAccidental(n);
+                })
+            } else if (note.pitch !== null) {
+                this.setAccidental(note);
+            }
         });
 
         return result;

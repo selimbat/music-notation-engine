@@ -1,24 +1,21 @@
 import ChordParser from "../chordParser";
 import { getNotesOfChord } from "../chords";
 import { NoteName } from "../definitions";
-import intervals, { getIntervalNote } from "../intervals";
+import intervals from "../intervals";
 import NotationBuilder from "../notationBuilder";
 import Note from "../note";
 import Pitch from "../pitch";
 import { ChordNotation, Interval } from "../types";
 import AbstractWalkingBassGenerator, { RepeatChord } from "./abstractWalkingBass";
 
-export default class ArpeggiosGenerator extends AbstractWalkingBassGenerator {
-    // Builds a walking bass that arpeggiates one chord per bar
-    // starting from the bass and ascending.
-    // Only works for 4/4.
-    // For triads, randomly pick 8th or 3rd for the fourth beat.
+export default class GuideTonesGenerator extends AbstractWalkingBassGenerator {
+
 
     constructor(changes: readonly (ChordNotation | RepeatChord)[], transposition: Interval = intervals[1].perfect) {
         super(changes, transposition);
 
         this.maxRange = new Pitch('B', 3);
-        this.minRange = new Pitch('E', 2);
+        this.minRange = new Pitch('C', 3);
     }
 
     private getRootOfChord(note: NoteName): Pitch {
@@ -38,30 +35,38 @@ export default class ArpeggiosGenerator extends AbstractWalkingBassGenerator {
     public walk(): string {
         let previousChord: ChordNotation | RepeatChord | null = null;
         const ABCBuilder = new NotationBuilder("4/4", "C", "bass");
+
         this.chordChanges.forEach(ch => {
             const chordSymbol = ch === '%' ? previousChord : ch;
             const [root, chord] = ChordParser.parse(chordSymbol as ChordNotation);
 
             const rootPitch = this.getRootOfChord(root);
 
-            const chordTones = getNotesOfChord(chord, rootPitch).map(p => new Note(0.25, p));
+            const chordTones = getNotesOfChord(chord, rootPitch);
 
-            if (chordTones.length === 3) {
-                let fourthBeatPitch: Pitch;
-                if (Math.random() < 0.5) {
-                    fourthBeatPitch = new Pitch(chordTones[0].pitch?.name!, chordTones[0].pitch?.getOctave()! + 1);
-                } else {
-                    fourthBeatPitch = chordTones[1].pitch!;
-                }
-                const fourthBeatNote = new Note(0.25, fourthBeatPitch)
-                chordTones.push(fourthBeatNote);
+            const guideTones = [chordTones[1]]; // the third
+
+            if (chordTones.length > 3) {
+                guideTones.push(chordTones[3]); // the seventh
             }
+
+            const notesToAdd = [
+                guideTones.map(t => new Note(0.25, t)),
+                guideTones.map(t => new Note(0.25, t)),
+                new Note(0.25, null),
+                guideTones.map(t => new Note(0.25, t)),
+            ]
 
             if (ch !== previousChord && ch !== '%') {
-                chordTones[0].setAccompaniment(ch);
+                const firstBeatNotes = notesToAdd[0];
+                if (Array.isArray(firstBeatNotes)) {
+                    firstBeatNotes[0].setAccompaniment(ch);
+                } else {
+                    firstBeatNotes.setAccompaniment(ch);
+                }
             }
 
-            ABCBuilder.addNotes(...chordTones);
+            ABCBuilder.addNotes(...notesToAdd);
             previousChord = chordSymbol;
         })
 

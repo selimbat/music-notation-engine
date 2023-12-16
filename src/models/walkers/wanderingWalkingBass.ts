@@ -8,24 +8,10 @@ import Pitch from "../pitch";
 import { ChordNotation, Interval } from "../types";
 import AbstractWalkingBassGenerator, { RepeatChord } from "./abstractWalkingBass";
 
-export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGenerator {
+export default class WalkingBassGenerator extends AbstractWalkingBassGenerator {
     // Builds a walking bass that plays the chord tones, starting from the root
     // and aiming for the root of the next chord.
     // Only works for 4/4.
-
-    private maxRange: Pitch;
-    private minRange: Pitch;
-
-    constructor(changes: readonly (ChordNotation | RepeatChord)[], transposition: Interval = intervals[1].perfect) {
-        super(changes, transposition);
-
-        this.maxRange = new Pitch('F', 4);
-        this.minRange = new Pitch('E', 2);
-    }
-
-    private isInRange(pitch: Pitch): boolean {
-        return pitch.value >= this.minRange.value && pitch.value <= this.maxRange.value;
-    }
 
     private getRootOfChord(note: NoteName, previous4thBeat: Pitch | null): Pitch {
         const pitch = new Pitch(note);
@@ -60,9 +46,7 @@ export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGe
         let previousDirection: 'up' | 'down' = 'down';
 
         this.chordChanges.forEach((ch, i) => {
-            const transposedChordSymbol = transposeChordNotation(ch, this.transpositionInterval);
-
-            const chordSymbol = transposedChordSymbol === '%' && previousChord ? previousChord : transposedChordSymbol;
+            const chordSymbol = ch === '%' && previousChord ? previousChord : ch;
             const [root, chord] = ChordParser.parse(chordSymbol as ChordNotation);
 
             const rootPitch = this.getRootOfChord(root, previous4thBeat);
@@ -141,8 +125,8 @@ export default class WanderingWalkingBassGenerator extends AbstractWalkingBassGe
                 }
             }
 
-            if (transposedChordSymbol !== previousChord && transposedChordSymbol !== '%') {
-                chordTones[0].setAccompaniment(transposedChordSymbol);
+            if (ch !== previousChord && ch !== '%') {
+                chordTones[0].setAccompaniment(ch);
             }
 
             if (chordTones.length === 3) {

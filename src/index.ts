@@ -1,8 +1,10 @@
 import intervals, { getIntervalForSemitones, getTonalDistance } from "./models/intervals";
-import WanderingWalkingBassGenerator from "./models/walkers/wanderingWalkingBass";
+import WalkingBassGenerator from "./models/walkers/wanderingWalkingBass";
 import { renderAbc } from "abcjs";
 import { changesBySong } from "./data/songs";
 import { NoteName, NoteRelativeValues, noteRelativeValues } from "./models/definitions";
+import ArpeggiosGenerator from "./models/walkers/simpleWalkingBass";
+import GuideTonesGenerator from "./models/walkers/guideTonesGenerator";
 
 type SelectOption = {
     value: string;
@@ -12,6 +14,8 @@ type SelectOption = {
 function buildSelect(id: string, label: string, options: SelectOption[], onChange: () => void) {
 
     const labelEl = document.createElement('label');
+    labelEl.setAttribute("for", id);
+    labelEl.style.marginLeft = '1.5rem';
     labelEl.appendChild(document.createTextNode(label));
     document.body.appendChild(labelEl);
 
@@ -27,19 +31,21 @@ function buildSelect(id: string, label: string, options: SelectOption[], onChang
     document.body.appendChild(selectEl);
 }
 
-const getSongId = () => {
-    const songSelect = document.getElementById("songSelect") as HTMLSelectElement;
-    return songSelect.options[songSelect.selectedIndex].value;
+const getSelectValue = (selectId: string) => {
+    const selectEl = document.getElementById(selectId) as HTMLSelectElement;
+    return selectEl.options[selectEl.selectedIndex].value;
 }
-const getTonality = () => {
-    const tonaSelect = document.getElementById("tonaSelect") as HTMLSelectElement;
-    return tonaSelect.options[tonaSelect.selectedIndex].value;
-}
+
+const getSongId = () => getSelectValue("songSelect");
+const getTonality = () => getSelectValue("tonaSelect");
+const getExercise = () => getSelectValue("exerciseSelect") as keyof typeof generators;
+
 
 function drawNotation() {
 
     const songId = getSongId();
     const tona = getTonality();
+    const exercise = getExercise();
 
     const [key, changes] = changesBySong[songId];
 
@@ -47,8 +53,13 @@ function drawNotation() {
 
     const transposition = getIntervalForSemitones((tonalDist < 0 ? tonalDist + 12 : tonalDist) as NoteRelativeValues);
 
-    const walkingBass = new WanderingWalkingBassGenerator(changes, transposition);
-    renderAbc(renderEl, walkingBass.walk());
+    const generatorClass = generators[exercise];
+    const generator = new generatorClass(changes, transposition);
+
+    const ABCNotation = generator.walk();
+
+    console.log(ABCNotation);
+    renderAbc(renderEl, ABCNotation);
 }
 
 const onSongChanged = () => {
@@ -75,8 +86,15 @@ const possibleKeys = [
     'B',
 ] as const;
 
+const generators = {
+    'Arpèges': ArpeggiosGenerator,
+    'Walking bass': WalkingBassGenerator,
+    'Guide notes': GuideTonesGenerator,
+}
+
 buildSelect("songSelect", "Grille : ", Object.keys(changesBySong).map(k => ({ value: k, label: k })), onSongChanged);
 buildSelect("tonaSelect", "Tonalité : ", possibleKeys.map(k => ({ value: k, label: k })), drawNotation);
+buildSelect("exerciseSelect", "Exercice : ", Object.keys(generators).map(k => ({ value: k, label: k })), drawNotation);
 
 
 const renderEl = document.createElement('div');
