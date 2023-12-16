@@ -4,7 +4,8 @@
   "description": "Basics for a music notation engine for personal use, maybe generating my own practice exercices.",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && rollup --config"
+    "build": "tsc && rollup --config",
+    "deploy": "cp ./assets/index.html ./dist/index.html && tsc && rollup --config"
   },
   "repository": {
     "type": "git",

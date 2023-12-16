@@ -49,7 +49,12 @@ export const changesBySong: Record<string, Song> = {
         'Db7', 'Ddim7', 'Abmaj7', 'F7',
         'Bb7', 'Eb7', 'Ab', 'Gb7',
     ]],
-
+    'ii V I': ['C', [
+        'D-7', 'G7', 'Cmaj7',
+    ]],
+    'vi ii V I': ['C', [
+        'A-7', 'D-7', 'G7', 'Cmaj7',
+    ]]
     // 'Grille de test': [
     //     'Eaug', 'F-7', 'Bb7', 'Eb-7',
     //     'Fb-', '%', 'A', 'D'

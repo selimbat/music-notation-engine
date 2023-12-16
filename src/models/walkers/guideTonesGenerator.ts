@@ -14,8 +14,8 @@ export default class GuideTonesGenerator extends AbstractWalkingBassGenerator {
     constructor(changes: readonly (ChordNotation | RepeatChord)[], transposition: Interval = intervals[1].perfect) {
         super(changes, transposition);
 
-        this.maxRange = new Pitch('B', 3);
-        this.minRange = new Pitch('C', 3);
+        this.maxRange = new Pitch('F', 4);
+        this.minRange = new Pitch('E', 2);
     }
 
     private getRootOfChord(note: NoteName): Pitch {
@@ -29,7 +29,30 @@ export default class GuideTonesGenerator extends AbstractWalkingBassGenerator {
         }
         const dist = this.minRange.value - pitch.value;
         return new Pitch(note, pitch.getOctave() + (Math.floor(dist / 12) + 1));
+    }
 
+    private duplicatePitchesOverRange(pitches: Pitch[]): Pitch[] {
+        const duplicatedPitches: Pitch[] = [];
+
+        pitches.forEach(p => {
+            let dupUpPitch: Pitch = p;
+            do {
+                if (this.isInRange(dupUpPitch)) {
+                    duplicatedPitches.push(dupUpPitch);
+                }
+                dupUpPitch = new Pitch(dupUpPitch.name, dupUpPitch.getOctave() + 1);
+            } while (dupUpPitch && this.isInRange(dupUpPitch));
+
+            let dupDownPitch: Pitch = new Pitch(p.name, p.getOctave() - 1);
+            do {
+                if (this.isInRange(dupDownPitch)) {
+                    duplicatedPitches.push(dupDownPitch);
+                }
+                dupDownPitch = new Pitch(dupDownPitch.name, dupDownPitch.getOctave() - 1);
+            } while (dupDownPitch && this.isInRange(dupDownPitch));
+        })
+
+        return duplicatedPitches;
     }
 
     public walk(): string {
@@ -50,11 +73,13 @@ export default class GuideTonesGenerator extends AbstractWalkingBassGenerator {
                 guideTones.push(chordTones[3]); // the seventh
             }
 
+            const duplicatedGuideTones = this.duplicatePitchesOverRange(guideTones);
+
             const notesToAdd = [
-                guideTones.map(t => new Note(0.25, t)),
-                guideTones.map(t => new Note(0.25, t)),
+                duplicatedGuideTones.map(t => new Note(0.25, t)),
+                duplicatedGuideTones.map(t => new Note(0.25, t)),
                 new Note(0.25, null),
-                guideTones.map(t => new Note(0.25, t)),
+                duplicatedGuideTones.map(t => new Note(0.25, t)),
             ]
 
             if (ch !== previousChord && ch !== '%') {
